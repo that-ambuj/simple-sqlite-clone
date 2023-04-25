@@ -33,6 +33,7 @@ pub fn run() -> Result<()> {
 
         let statement = Statement::prepare(&input)?;
         statement.execute()?;
+        println!("Executed.");
 
         Ok(())
     } else {
