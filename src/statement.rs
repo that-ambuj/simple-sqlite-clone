@@ -1,11 +1,8 @@
+use crate::Row;
 use anyhow::{bail, Result};
 
-pub struct Statement {
-    stmt_type: StatementType,
-}
-
-pub enum StatementType {
-    Insert,
+pub enum Statement {
+    Insert(Row),
     Select,
 }
 
@@ -18,23 +15,19 @@ impl Statement {
         let (start, _) = stmt.split_at(6);
 
         match start {
-            "insert" => Ok(Self {
-                stmt_type: StatementType::Insert,
-            }),
-            "select" => Ok(Self {
-                stmt_type: StatementType::Select,
-            }),
+            "insert" => Ok(Self::Insert(Row::new(stmt)?)),
+            "select" => Ok(Self::Select),
             _ => bail!("Unrecognized keyword at start of {:?}", stmt),
         }
     }
 
     pub fn execute(&self) -> Result<()> {
-        match self.stmt_type {
-            StatementType::Insert => {
+        match self {
+            Statement::Insert(row) => {
                 println!("This is where you would do an insert.");
                 Ok(())
             }
-            StatementType::Select => {
+            Statement::Select => {
                 println!("This is where you would do a select.");
                 Ok(())
             }
