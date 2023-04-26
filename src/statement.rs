@@ -15,7 +15,7 @@ impl Statement {
         let (start, _) = stmt.split_at(6);
 
         match start {
-            "insert" => Ok(Self::Insert(Row::new(stmt)?)),
+            "insert" => Ok(Self::Insert(Row::from_str(stmt)?)),
             "select" => Ok(Self::Select),
             _ => bail!("Unrecognized keyword at start of {:?}", stmt),
         }
