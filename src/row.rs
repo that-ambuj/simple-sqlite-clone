@@ -45,6 +45,10 @@ impl Row {
 
         Ok(row)
     }
+
+    pub(crate) fn print(&self) {
+        println!("({}, {}, {})", self.id, self.username, self.email);
+    }
 }
 
 #[cfg(test)]
