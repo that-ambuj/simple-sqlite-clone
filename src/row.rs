@@ -1,9 +1,8 @@
 use serde::{Deserialize, Serialize};
-use std::io::{Read, Write};
 
 use anyhow::{bail, Result};
 
-#[derive(Serialize, Deserialize)]
+#[derive(Serialize, Deserialize, PartialEq, Debug)]
 pub struct Row {
     id: u32,
     username: String,
@@ -11,7 +10,15 @@ pub struct Row {
 }
 
 impl Row {
-    pub fn new(stmt: &str) -> Result<Self> {
+    pub fn new(id: u32, username: &str, email: &str) -> Self {
+        Self {
+            id,
+            username: username.into(),
+            email: email.into(),
+        }
+    }
+
+    pub fn from_str(stmt: &str) -> Result<Self> {
         let split_stmt: Vec<_> = stmt.split_whitespace().collect();
 
         if let ["insert", id, username, email] = split_stmt.as_slice() {
@@ -27,15 +34,46 @@ impl Row {
         bail!("Syntax Error(Invalid Syntax): {:?}", stmt);
     }
 
-    pub fn write_to<T: Write>(&self, dest: T) -> Result<()> {
-        bincode::serialize_into(dest, self)?;
+    pub fn to_bytes(&self) -> Result<Vec<u8>> {
+        let bytes = bincode::serialize(&self)?;
 
-        Ok(())
+        Ok(bytes)
     }
 
-    pub fn read_from<T: Read>(source: T) -> Result<Self> {
-        let row = bincode::deserialize_from(source)?;
+    pub fn from_bytes(bytes: &[u8]) -> Result<Self> {
+        let row = bincode::deserialize(bytes)?;
 
         Ok(row)
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn parses_correctly_from_string() {
+        let row = Row::from_str("insert 1 ambuj example@email.com");
+
+        assert!(row.is_ok());
+        let row = row.unwrap();
+
+        assert_eq!(1, row.id);
+        assert_eq!("ambuj", row.username);
+        assert_eq!("example@email.com", row.email);
+    }
+
+    #[test]
+    fn converts_to_and_from_bytes() {
+        let row = Row::new(1, "doejohn", "john@doe.com");
+
+        let bytes = row.to_bytes();
+        assert!(bytes.is_ok());
+
+        let bytes = bytes.unwrap();
+
+        let new_row = Row::from_bytes(&bytes);
+        assert!(new_row.is_ok());
+        assert_eq!(row, new_row.unwrap());
     }
 }
