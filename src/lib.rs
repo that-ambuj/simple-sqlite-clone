@@ -1,3 +1,4 @@
+#[warn(clippy::perf, clippy::dbg_macro)]
 mod row;
 mod statement;
 mod table;
