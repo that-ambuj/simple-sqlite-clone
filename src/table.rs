@@ -4,7 +4,7 @@ use serde::{Deserialize, Serialize};
 use crate::Row;
 
 #[derive(Debug, Serialize, Deserialize, PartialEq, Default)]
-struct Table {
+pub struct Table {
     rows: Vec<Row>,
 }
 
@@ -13,13 +13,13 @@ impl Table {
         Default::default()
     }
 
-    pub fn push(&mut self, table: Row) {
-        self.rows.push(table);
+    pub fn push(&mut self, row: Row) {
+        self.rows.push(row);
     }
 
     pub fn select_all(&self) {
-        for table in &self.rows {
-            table.print();
+        for row in &self.rows {
+            row.print();
         }
     }
 
