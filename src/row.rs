@@ -2,7 +2,7 @@ use serde::{Deserialize, Serialize};
 
 use anyhow::{bail, Result};
 
-#[derive(Serialize, Deserialize, PartialEq, Debug)]
+#[derive(Serialize, Deserialize, PartialEq, Debug, Clone)]
 pub struct Row {
     id: u32,
     username: String,
@@ -18,17 +18,13 @@ impl Row {
         }
     }
 
-    pub fn from_str(stmt: &str) -> Result<Self> {
+    pub fn from_string(stmt: &str) -> Result<Self> {
         let split_stmt: Vec<_> = stmt.split_whitespace().collect();
 
         if let ["insert", id, username, email] = split_stmt.as_slice() {
             let id = id.parse::<u32>()?;
 
-            return Ok(Self {
-                id,
-                username: (*username).into(),
-                email: (*email).into(),
-            });
+            return Ok(Self::new(id, username, email));
         }
 
         bail!("Syntax Error(Invalid Syntax): {:?}", stmt);
@@ -57,7 +53,7 @@ mod tests {
 
     #[test]
     fn parses_correctly_from_string() {
-        let row = Row::from_str("insert 1 ambuj example@email.com");
+        let row = Row::from_string("insert 1 ambuj example@email.com");
 
         assert!(row.is_ok());
         let row = row.unwrap();
