@@ -20,7 +20,7 @@ impl Statement {
         match start {
             "insert" => Ok(Self::Insert(Row::from_string(stmt)?)),
             "select" => Ok(Self::Select),
-            _ => bail!("Unrecognized keyword at start of {}", stmt),
+            _ => bail!("Syntax Error. Could not parse statement: {:?}", stmt),
         }
     }
 
