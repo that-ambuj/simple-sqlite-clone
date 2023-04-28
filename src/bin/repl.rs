@@ -4,7 +4,7 @@ use std::{
     process::exit,
 };
 
-use simple_sqlite_clone::Statement;
+use simple_sqlite_clone::{Statement, Table};
 
 #[derive(Debug)]
 pub enum ExitCode {
@@ -14,7 +14,7 @@ pub enum ExitCode {
     Error,
 }
 
-pub fn run() -> Result<()> {
+pub fn run(table: &mut Table) -> Result<()> {
     let mut stdout = io::stdout();
     stdout.write_all(b"db -> ")?;
     stdout.flush()?;
@@ -25,15 +25,15 @@ pub fn run() -> Result<()> {
         if let (".", _) = input.split_at(1) {
             if let Err(e) = run_meta_command(&input) {
                 eprintln!("{}", e);
-                exit(ExitCode::Failure as i32)
+                // exit(ExitCode::Failure as i32)
             } else {
                 println!("Executed.");
             }
         }
 
         let statement = Statement::prepare(&input)?;
-        statement.execute()?;
-        println!("Executed.");
+        statement.execute(table)?;
+        println!("Executed");
 
         Ok(())
     } else {
@@ -51,14 +51,14 @@ fn run_meta_command(cmd: &str) -> Result<()> {
             println!("Finished");
             exit(ExitCode::OK as i32)
         }
-        _ => {
-            return Err(anyhow!("Unrecognised command: {}", cmd));
-        }
+        _ => Err(anyhow!("Unrecognised command: {}", cmd)),
     }
 }
 
 fn main() {
+    let mut temp_table = Table::new();
+
     loop {
-        let _ = run();
+        run(&mut temp_table).unwrap();
     }
 }
